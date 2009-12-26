@@ -1,0 +1,298 @@
+Clump -- say goodbye to Makefiles
+
+Author   : Patrick Chkoreff
+Created  : 2003-12-15
+Modified : 2006-10-20
+
+The clump program is distributed under the terms of the GNU General Public 
+License described in the LICENSE file included with the source code.
+
+-- SYNOPSIS
+
+The clump program compiles and links your C programs portably and intelligently
+so you don't have to fuss with makefiles.
+
+This version works on both the Unix and Windows styles of operating systems.
+So it should work without change on Mac OS X, Linux, BSD, and various forms
+of Windows.
+
+-- HOW TO INSTALL CLUMP
+
+After you download the clump code, cd into the "src" directory:
+
+   cd src
+
+Now you should be able to install clump with just a single command,
+regardless of whether you are running Linux, Mac OS X, or Windows.
+
+If you're installing on Windows, the command is slightly different
+(see below).
+
+
+-- INSTALLING CLUMP ON LINUX OR MAC OS X
+
+Run this command:
+
+   sudo ./run install
+
+After you install clump, you can see a little help screen by running "clump -h".
+A snapshot of this screen is included at the end of this document.
+
+Note that the "run" command also has other functions which you may find useful.
+Just execute "./run" with no options to see a list of these other functions.
+
+
+-- INSTALLING CLUMP ON WINDOWS
+
+Execute this command:
+
+   run install
+
+After you install clump, you can see a little help screen by running "clump -h".
+A snapshot of this screen is included at the end of this document.
+
+Note that the "run" command also has other functions which you may find useful.
+Just execute "run" with no options to see a list of these other functions.
+
+
+-- WHAT IS CLUMP?
+
+The clump program compiles and links your C programs portably and intelligently
+so you don't have to fuss with makefiles.
+
+I wrote the clump program to make it easier for me to write C code.  I wanted
+my development process to be as follows:
+
+1.  Write the C code for my program.
+2.  Run "clump".
+3.  Run my program.
+
+Personally, I love writing C code but I hate writing makefiles.  I despise
+constantly having to keep my makefile in synch with the structure of my C
+code.  It's even worse when I'm writing code for both Unix and Windows because
+then I have to keep TWO makefiles in synch with my C code.  I'm just tired of
+having to edit one or more makefiles every time I add or delete a #include,
+introduce or delete a C file, refactor my C code, or whatever.  I have long
+realized that the information in a makefile is largely redundant anyway --
+almost all the necessary information to create a makefile already exists right
+in the .c and .h files themselves.  Any extra information needed can easily be
+specified in a separate little configuration file.
+
+One day I did a project that pushed me right over the pain threshold, and I
+decided finally to go ahead and create the 'clump' program.  I vowed never to
+write a Makefile again.  From here on, if I ever encounter any situation that
+'clump' cannot handle, I will simply enhance the clump program rather than
+endure the torture of makefiles ever again.
+
+[Note:  For those who still love makefiles I will soon implement a -m option
+to clump that will create a makefile automatically.  This option will be a
+testament to the fundamental redundancy of the information in a makefile, and
+the horrible loss of programmer productivity involved with maintaining
+makefiles.  I wonder how many countless thousands of hours have been wasted on
+such menial labor.]
+
+
+Once you have clump installed, building your C programs is a cinch.  Just cd
+into the directory containing your C source code and run 'clump' with no
+options.  This will compile and link your C code in the most intelligent
+way possible.  By this I mean:
+
+  - Determine which C files need compiling by analyzing header include
+    dependencies and checking timestamps on the .o, .c, and .h files.
+
+  - Determine which C files are main programs by looking for an "int main"
+    declaration.
+
+  - For each main program, determine the exact set of .o files that need to
+    be linked together to build an executable file.  It does this by tracing
+    the header dependencies in a recursive manner (transitive closure),
+    starting from the main program and working outward.  The idea here is
+    that if a C file says #include "thing.h", then the module thing.o
+    should be linked into the executable, and anything referenced from
+    thing.c should also be included.
+
+  - Determine which system libraries need to be linked into a program
+    based on any system includes.  For example, if a C file says
+    #include <curses.h>, then clump will know to put "-lcurses" on the
+    link command line.  This is all configurable in the clump.ini file.
+
+  - Allow the specification of complex options in a clump.ini file in the
+    local directory, but do not require that file to be present.  In the
+    clump.ini file you can specify some simple directives to control the
+    fine details of the build, including target directories and specific
+    compile and link command templates.
+
+[Note:  For a quick example please see the sample "clump.ini" file.]
+
+The clump.ini file is entirely optional, and if absent the clump program will
+work with suitable defaults.  On a UNIX-style system, these defaults are set
+exactly as if a clump.ini file existed and contained these directives:
+
+  objdir ../obj
+  bindir ../bin
+  compile "gcc -c -Wall -Werror -ansi -O2 $(cfile) -o $(ofile)"
+  link "gcc $(objects) -o $(efile)"
+
+
+Note the default directories ../obj and ../bin.  I like this because it keeps
+the .o and executable files out of the way, well away from your primary C
+source files.  Some people prefer to create the .o and executable files right
+in the same directory with the source code, so in that case you can use:
+
+  objdir ""
+  bindir ""
+
+If you prefer to be more explicit here you can use "." as the target directory.
+
+Other people prefer to create intermediate files in a subdirectory under the
+source file directory, for example:
+
+  objdir obj
+  bindir bin
+
+Note that the clump program will tolerate a directory name with a
+trailing '/', so you can say "obj/" if you like.
+
+This clump release will also work unchanged on Windows.  It uses these
+defaults:
+
+  objdir ..\obj
+  bindir ..\bin
+  compile "cl -c $(cfile) /Fo$(ofile)"
+  link "link -out:$(efilt) $(objects)"
+
+
+
+The clump program also has a 'syshdr' directive which associates a system
+header file with any extra link options needed when that header file is used.
+
+For example, let's say you have this in one of your C files:
+  #include <curses.h>
+
+The clump program needs to know that when a C file includes curses.h, the link
+command must have "-lcurses" on it so that the curses library is linked into
+the executable.  So the clump.ini file must contain this directive:
+
+  syshdr curses.h -lcurses
+
+You can also use quoted syntax whenever an option contains spaces.  For example
+if you wanted to link more than one library when curses.h was included you would
+use a directive like this:
+
+  syshdr curses.h "-lcurses -lother"
+
+Note:  if you want to include quotes within a quoted string you can use
+backslash notation, e.g.:
+
+  "This is a string with \"embedded\" quotes."
+
+
+Here are some other examples of the syshdr directive:
+
+  syshdr openssl/dsa.h -lcrypto
+  syshdr mycrypt.h -ltomcrypt
+
+Perhaps in the future clump will have default syshdr associations for some
+highly standard header files such as curses.h, but I do not think this is
+especially important.
+
+
+
+The clump program also supports some command-line options.  To see these, just
+run "clump -h" to view the help screen (see below).
+
+
+-- TODO LIST
+
+- A -m option to automatically create a Makefile.
+
+- A "compile_exception" directive that allows you to specify a different
+compile command for a specific file, e.g. one that needs a special flag set,
+different optimization level, etc.
+
+- Support for building libraries (shared and static) instead of just
+executables.
+
+
+-- NOTE TO THOSE WHO WISH TO CHANGE THE CLUMP SOURCE CODE
+
+Note that once you've built clump for the first time using "./run install" or
+"./run build", from then on clump is capable of building itself.  So if you
+want to change the clump source code, you can build your new version by just
+typing 'clump'.
+
+For this it helps to include "../bin" at the front of your search path so
+when you type 'clump' you'll run the local version created in ../bin.  Then
+when you're done with all your changes you can run "./run publish" to put
+your program in /usr/local/bin.
+
+
+-- A SAMPLE CLUMP.INI CONFIGURATION FILE
+
+# This is a sample clump.ini file just to illustrate the syntax.  This file
+# would reside in your local project directory containing your C source code.
+#
+# In practice these particular objdir, bindir, compile, and link directives
+# would not be necessary because these are the default values used by clump
+# anyway.  So if you like these defaults and you don't need any "syshdr"
+# directives, you don't even need a clump.ini file at all.
+
+objdir ../obj
+bindir ../bin
+
+compile "gcc -c -Wall -Werror -ansi -O2 $(cfile) -o $(ofile)"
+link "gcc $(objects) -o $(efile)"
+
+
+# Here is an example of the syshdr directive.  This would cause clump to link
+# with -lcurses if it found a C file that said #include <curses.h>.
+
+syshdr curses.h -lcurses
+
+
+
+-- THE CURRENT CLUMP HELP SCREEN (USAGE MESSAGE)
+
+Here's what you get when you run "clump -h":
+
+Usage: clump [-a | -c | -h | -q | -s] [-f]
+
+To compile and build your C programs, just run 'clump' with no options.
+This compiles and links your C code in the most intelligent way possible.
+See the README file for more details on what this means.
+
+Other options are:
+
+  clump -a
+    Analyze the C files in the current directory, printing a detailed report
+    showing all the header includes and exactly what needs to be recompiled
+    and linked.  The report is in YAML format (http://yaml.org).
+
+  clump -c
+    Clean out (delete) all target files, but do not perform a build.
+
+  clump -f
+    Force the program to consider all targets out of date and in need of
+    rebuilding.  Can be used in conjunction with the -a, -q, or -s options.
+
+  clump -h
+    Show this help screen.
+
+  clump -q
+    Do the build but be quiet about it, not showing the commands being
+    executed.
+
+  clump -s
+    Show the commands that would be used to do the build without actually
+    executing them.
+
+  clump -v
+    Show the version number.
+
+  (COMING SOON)
+  clump -m
+    Create a Makefile.
+
+Normally you'll just run 'clump' with no command-line options whatsoever,
+and this will compile and link your C code in the most intelligent way
+possible.
