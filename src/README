@@ -7,7 +7,8 @@ Modified : 2006-10-20
 The clump program is distributed under the terms of the GNU General Public 
 License described in the LICENSE file included with the source code.
 
--- SYNOPSIS
+
+SYNOPSIS
 
 The clump program compiles and links your C programs portably and intelligently
 so you don't have to fuss with makefiles.
@@ -16,46 +17,50 @@ This version works on both the Unix and Windows styles of operating systems.
 So it should work without change on Mac OS X, Linux, BSD, and various forms
 of Windows.
 
--- HOW TO INSTALL CLUMP
 
-After you download the clump code, cd into the "src" directory:
+HOW TO INSTALL CLUMP ON LINUX OR MAC OS X
+
+Download the source code and then type:
 
    cd src
-
-Now you should be able to install clump with just a single command,
-regardless of whether you are running Linux, Mac OS X, or Windows.
-
-If you're installing on Windows, the command is slightly different
-(see below).
-
-
--- INSTALLING CLUMP ON LINUX OR MAC OS X
-
-Run this command:
-
    sudo ./run install
 
-After you install clump, you can see a little help screen by running "clump -h".
-A snapshot of this screen is included at the end of this document.
-
 Note that the "run" command also has other functions which you may find useful.
-Just execute "./run" with no options to see a list of these other functions.
+Just type "./run" with no options to see a list of these other functions.
 
 
--- INSTALLING CLUMP ON WINDOWS
+HOW TO INSTALL CLUMP ON WINDOWS
 
-Execute this command:
+Download the source code and then type:
 
+   cd src
    run install
 
-After you install clump, you can see a little help screen by running "clump -h".
-A snapshot of this screen is included at the end of this document.
-
 Note that the "run" command also has other functions which you may find useful.
-Just execute "run" with no options to see a list of these other functions.
+Just type "run" with no options to see a list of these other functions.
 
 
--- WHAT IS CLUMP?
+AFTER INSTALLING
+
+After you install clump, you can run "clump -h" to see a help screen.
+A snapshot of this help screen is included at the end of this document.
+
+To build a C program, just "cd" into your source directory and type "clump".
+By default it will put your object files in "../obj" and your executable file
+in "../bin".
+
+Now programming in C can be as easy as programming in an interpreted scripting
+language.  Just write your code, "clump" it, and run!
+
+You can get clever too.  When I'm working on my "fexl" project (a functional
+progamming language), I define a shell alias as follows:
+
+  alias try='clump && fexl'
+
+Then as I'm hacking my code I just type "try" to build and run it.
+
+
+MORE ABOUT CLUMP
 
 The clump program compiles and links your C programs portably and intelligently
 so you don't have to fuss with makefiles.
@@ -91,7 +96,6 @@ the horrible loss of programmer productivity involved with maintaining
 makefiles.  I wonder how many countless thousands of hours have been wasted on
 such menial labor.]
 
-
 Once you have clump installed, building your C programs is a cinch.  Just cd
 into the directory containing your C source code and run 'clump' with no
 options.  This will compile and link your C code in the most intelligent
@@ -120,9 +124,11 @@ way possible.  By this I mean:
     local directory, but do not require that file to be present.  In the
     clump.ini file you can specify some simple directives to control the
     fine details of the build, including target directories and specific
-    compile and link command templates.
+    compile and link command templates.  (A sample "clump.ini" file is shown
+	below.)
 
-[Note:  For a quick example please see the sample "clump.ini" file.]
+
+MORE ABOUT THE CLUMP.INI FILE
 
 The clump.ini file is entirely optional, and if absent the clump program will
 work with suitable defaults.  On a UNIX-style system, these defaults are set
@@ -161,8 +167,6 @@ defaults:
   compile "cl -c $(cfile) /Fo$(ofile)"
   link "link -out:$(efilt) $(objects)"
 
-
-
 The clump program also has a 'syshdr' directive which associates a system
 header file with any extra link options needed when that header file is used.
 
@@ -196,38 +200,23 @@ Perhaps in the future clump will have default syshdr associations for some
 highly standard header files such as curses.h, but I do not think this is
 especially important.
 
-
-
 The clump program also supports some command-line options.  To see these, just
 run "clump -h" to view the help screen (see below).
 
 
--- TODO LIST
+NOTE TO THOSE WHO WISH TO CHANGE THE CLUMP SOURCE CODE
 
-- A -m option to automatically create a Makefile.
-
-- A "compile_exception" directive that allows you to specify a different
-compile command for a specific file, e.g. one that needs a special flag set,
-different optimization level, etc.
-
-- Support for building libraries (shared and static) instead of just
-executables.
-
-
--- NOTE TO THOSE WHO WISH TO CHANGE THE CLUMP SOURCE CODE
-
-Note that once you've built clump for the first time using "./run install" or
-"./run build", from then on clump is capable of building itself.  So if you
-want to change the clump source code, you can build your new version by just
-typing 'clump'.
+Once you have installed clump for the first time, clump is then capable of
+building itself.  So if you want to change the clump code, you can build your
+new version by just typing "clump".
 
 For this it helps to include "../bin" at the front of your search path so
-when you type 'clump' you'll run the local version created in ../bin.  Then
-when you're done with all your changes you can run "./run publish" to put
+when you type "clump" you'll run the local version created in ../bin.  Then
+when you're done with all your changes you can type "./run publish" to put
 your program in /usr/local/bin.
 
 
--- A SAMPLE CLUMP.INI CONFIGURATION FILE
+A SAMPLE CLUMP.INI CONFIGURATION FILE
 
 # This is a sample clump.ini file just to illustrate the syntax.  This file
 # would reside in your local project directory containing your C source code.
@@ -250,8 +239,7 @@ link "gcc $(objects) -o $(efile)"
 syshdr curses.h -lcurses
 
 
-
--- THE CURRENT CLUMP HELP SCREEN (USAGE MESSAGE)
+THE CURRENT CLUMP HELP SCREEN (USAGE MESSAGE)
 
 Here's what you get when you run "clump -h":
 
@@ -296,3 +284,15 @@ Other options are:
 Normally you'll just run 'clump' with no command-line options whatsoever,
 and this will compile and link your C code in the most intelligent way
 possible.
+
+
+TODO LIST
+
+- A -m option to automatically create a Makefile.
+
+- A "compile_exception" directive that allows you to specify a different
+compile command for a specific file, e.g. one that needs a special flag set,
+different optimization level, etc.
+
+- Support for building libraries (shared and static) instead of just
+executables.
