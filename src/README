@@ -288,6 +288,9 @@ possible.
 
 TODO LIST
 
+- Don't require all source code to be in a single flat directory.  Handle
+source code inside nested directories as well.
+
 - A -m option to automatically create a Makefile.
 
 - A "compile_exception" directive that allows you to specify a different

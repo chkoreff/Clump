@@ -461,6 +461,14 @@ void fmt_cmd(const char *template, struct clist_entry *cdata,
 		}
 	}
 
+/* Run a system command but ignore any errors. 
+*/
+void do_system(const char *cmd)
+	{
+	int result = system(cmd);
+	(void)result;
+	}
+
 void do_build(void)
 	{
 	struct bufd cmd;
@@ -482,7 +490,7 @@ void do_build(void)
 			if (opt_clean)
 				unlink(cdata->ofile.beg);
 			if (opt_build)
-				system(cmd.beg);
+				do_system(cmd.beg);
 			}
 		}
 
@@ -497,7 +505,7 @@ void do_build(void)
 			if (opt_clean)
 				unlink(cdata->efile.beg);
 			if (opt_build)
-				system(cmd.beg);
+				do_system(cmd.beg);
 			}
 		}
 
